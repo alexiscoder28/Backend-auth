@@ -1,3 +1,4 @@
+require('dotenv').config()
 
 const express = require ('express')
 const morgan = require('morgan')
@@ -5,6 +6,7 @@ const app = express();
 const dbConnection = require('./config/db');
 const userModel = require('./models/user');
 
+const jwt = require('jsonwebtoken');
 
 
 
@@ -36,6 +38,33 @@ app.post('/register' , async (req, res) => {
  } catch(error) {
     res.json({ success: false, message: 'Registration failed: ' + error.message })
  }
+})
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body
+    try {
+        const user = await userModel.findOne({ email })
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' })
+        }
+        const isMatch = await user.comparePassword(password)
+        if (!isMatch) {
+            return res.json({ success: false, message: 'Invalid password' })
+        }
+        const token = jwt.sign(
+            { userId: user._id, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        )
+        res.json({ 
+            success: true, 
+            message: 'Login successful',
+            token,
+            user: { username: user.username, email: user.email }
+        })
+    } catch (error) {
+        res.json({ success: false, message: 'Login failed: ' + error.message })
+    }
 })
 
 app.get('/get-users', async (req,res) =>{

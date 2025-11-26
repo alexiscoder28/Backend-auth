@@ -156,6 +156,15 @@
                 <div class="response" id="reg-response"></div>
             </div>
 
+            <!-- Login User -->
+            <div class="api-card">
+                <h3><span class="method post">POST</span> Login User</h3>
+                <input type="email" id="login-email" placeholder="Email">
+                <input type="password" id="login-password" placeholder="Password">
+                <button onclick="loginUser()">Login</button>
+                <div class="response" id="login-response"></div>
+            </div>
+
             <!-- Get All Users -->
             <div class="api-card">
                 <h3><span class="method get">GET</span> Get All Users</h3>
@@ -237,6 +246,35 @@
                 }
             } catch(error) {
                 showResponse('reg-response', {error: error.message}, false);
+            }
+        }
+
+        async function loginUser() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            if(!email || !password) {
+                showResponse('login-response', {error: 'Email and password required'}, false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                showResponse('login-response', data, data.success);
+                if(data.success) {
+                    document.getElementById('login-email').value = '';
+                    document.getElementById('login-password').value = '';
+                    // Store token in localStorage
+                    localStorage.setItem('authToken', data.token);
+                    console.log('JWT Token:', data.token);
+                }
+            } catch(error) {
+                showResponse('login-response', {error: error.message}, false);
             }
         }
 

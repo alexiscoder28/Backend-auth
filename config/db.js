@@ -1,12 +1,16 @@
+require('dotenv').config()
 const mongoose = require("mongoose");
 
-const connection = mongoose.connect("mongodb://localhost:27017/backend")
-  .then(() => {
+mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+})
+.then(() => {
     console.log("✅ Database connected successfully");
-  })
-  .catch((err) => {
+})
+.catch((err) => {
     console.error("❌ MongoDB connection error:", err);
-  });
+});
 
 module.exports = mongoose;
  
