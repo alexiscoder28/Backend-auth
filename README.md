@@ -2,6 +2,8 @@
 
 > A full-stack authentication system built with Node.js, Express, MongoDB, and JWT tokens featuring password hashing, user management, and an interactive API dashboard.
 
+🔗 **[Live Demo](https://backend-auth-1-nseo.onrender.com/)**
+
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-green.svg)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-v5.1-blue.svg)](https://expressjs.com/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen.svg)](https://www.mongodb.com/)
