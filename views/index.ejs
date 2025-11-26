@@ -1,24 +1,325 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Backend Auth - API Dashboard</title>
     <link rel="stylesheet" href="index.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .api-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        .api-card:hover {
+            transform: translateY(-5px);
+        }
+        .api-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .method {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .post { background: #10b981; color: white; }
+        .get { background: #3b82f6; color: white; }
+        .api-card input, .api-card button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+        .api-card button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .api-card button:hover {
+            background: #5568d3;
+        }
+        .response {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            min-height: 50px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            display: none;
+        }
+        .response.show {
+            display: block;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        .users-list {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        .users-list h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background: #f9fafb;
+            color: #374151;
+            font-weight: 600;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .connected { background: #10b981; }
+        .disconnected { background: #ef4444; }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🚀 Backend Auth API Dashboard</h1>
+        <p class="subtitle">
+            <span class="status-indicator" id="dbStatus"></span>
+            Test all backend endpoints in real-time
+        </p>
 
-   
-    <form action ="/get-form-date" 
-     method= "post">
-        <input type="text" placeholder="Enter your name" name ="username">
-        <input type ="text" placeholder="Enter your email" name ="email">
-        <input type = "password" placeholder="Enter your password" name="password">
+        <div class="api-grid">
+            <!-- Register User -->
+            <div class="api-card">
+                <h3><span class="method post">POST</span> Register User</h3>
+                <input type="text" id="reg-username" placeholder="Username">
+                <input type="email" id="reg-email" placeholder="Email">
+                <input type="password" id="reg-password" placeholder="Password">
+                <button onclick="registerUser()">Register</button>
+                <div class="response" id="reg-response"></div>
+            </div>
 
-        <button type="submit">Submit</button>
-    </form>
-    <script src="/assets/index.js"></script>
+            <!-- Get All Users -->
+            <div class="api-card">
+                <h3><span class="method get">GET</span> Get All Users</h3>
+                <p>Fetch all registered users from database</p>
+                <button onclick="getUsers()">Fetch Users</button>
+                <div class="response" id="users-response"></div>
+            </div>
+
+            <!-- Update User -->
+            <div class="api-card">
+                <h3><span class="method post">POST</span> Update User</h3>
+                <input type="text" id="upd-username" placeholder="Username to update">
+                <input type="email" id="upd-email" placeholder="New email">
+                <button onclick="updateUser()">Update</button>
+                <div class="response" id="upd-response"></div>
+            </div>
+
+            <!-- Delete User -->
+            <div class="api-card">
+                <h3><span class="method post">POST</span> Delete User</h3>
+                <input type="text" id="del-username" placeholder="Username to delete">
+                <button onclick="deleteUser()">Delete</button>
+                <div class="response" id="del-response"></div>
+            </div>
+        </div>
+
+        <div class="users-list">
+            <h3>📊 User Database</h3>
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>ID</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="3" style="text-align: center; color: #9ca3af;">Click "Fetch Users" to load data</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Check DB status on load
+        window.onload = function() {
+            getUsers();
+        };
+
+        function showResponse(elementId, data, success) {
+            const el = document.getElementById(elementId);
+            el.textContent = JSON.stringify(data, null, 2);
+            el.className = 'response show ' + (success ? 'success' : 'error');
+        }
+
+        async function registerUser() {
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            if(!username || !email || !password) {
+                showResponse('reg-response', {error: 'All fields required'}, false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, email, password})
+                });
+                const data = await res.json();
+                showResponse('reg-response', data, data.success);
+                if(data.success) {
+                    document.getElementById('reg-username').value = '';
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-password').value = '';
+                    getUsers();
+                }
+            } catch(error) {
+                showResponse('reg-response', {error: error.message}, false);
+            }
+        }
+
+        async function getUsers() {
+            try {
+                const res = await fetch('/get-users');
+                const data = await res.json();
+                showResponse('users-response', data, data.success);
+                
+                const statusEl = document.getElementById('dbStatus');
+                statusEl.className = 'status-indicator ' + (data.success ? 'connected' : 'disconnected');
+
+                if(data.success && data.users) {
+                    const tbody = document.getElementById('usersTableBody');
+                    if(data.users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #9ca3af;">No users found</td></tr>';
+                    } else {
+                        tbody.innerHTML = data.users.map(user => `
+                            <tr>
+                                <td>${user.username}</td>
+                                <td>${user.email}</td>
+                                <td style="font-size: 0.85em; color: #6b7280;">${user._id}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch(error) {
+                showResponse('users-response', {error: error.message}, false);
+                document.getElementById('dbStatus').className = 'status-indicator disconnected';
+            }
+        }
+
+        async function updateUser() {
+            const username = document.getElementById('upd-username').value;
+            const email = document.getElementById('upd-email').value;
+
+            if(!username || !email) {
+                showResponse('upd-response', {error: 'Username and email required'}, false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/update-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, email})
+                });
+                const data = await res.json();
+                showResponse('upd-response', data, data.success);
+                if(data.success) {
+                    document.getElementById('upd-username').value = '';
+                    document.getElementById('upd-email').value = '';
+                    getUsers();
+                }
+            } catch(error) {
+                showResponse('upd-response', {error: error.message}, false);
+            }
+        }
+
+        async function deleteUser() {
+            const username = document.getElementById('del-username').value;
+
+            if(!username) {
+                showResponse('del-response', {error: 'Username required'}, false);
+                return;
+            }
+
+            try {
+                const res = await fetch('/delete-user', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username})
+                });
+                const data = await res.json();
+                showResponse('del-response', data, data.success);
+                if(data.success) {
+                    document.getElementById('del-username').value = '';
+                    getUsers();
+                }
+            } catch(error) {
+                showResponse('del-response', {error: error.message}, false);
+            }
+        }
+    </script>
 </body>
-
 </html>
